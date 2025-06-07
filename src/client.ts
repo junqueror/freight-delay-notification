@@ -1,34 +1,25 @@
 import { Connection, Client } from '@temporalio/client';
+import { getAddressFromIP } from './workflows';
 import { nanoid } from 'nanoid';
 import { TASK_QUEUE_NAME } from './shared';
-
-// import your workflow
-import { YOUR_WORKFLOW } from './workflows';
+import process from 'process';
 
 async function run() {
-  // Connect to the default Server location
+
+  if (process.argv.length <= 2) {
+    console.error('Must specify a name as the command-line argument');
+    process.exit(1);
+  }
+
+  const name = process.argv[2];
   const connection = await Connection.connect({ address: 'localhost:7233' });
-  // In production, pass options to configure TLS and other settings:
-  // {
-  //   address: 'foo.bar.tmprl.cloud',
-  //   tls: {}
-  // }
+  const client = new Client({ connection });
 
-  const client = new Client({
-    connection,
-    // namespace: 'foo.bar', // connects to 'default' namespace if not specified
-  });
-
-  const handle = await client.workflow.start(YOUR_WORKFLOW, {
+  const handle = await client.workflow.start(getAddressFromIP, {
     taskQueue: TASK_QUEUE_NAME,
-    // type inference works! args: [name: string]
-    args: ['Temporal'],
-    // in practice, use a meaningful business ID, like customerId or transactionId
-    workflowId: 'workflow-' + nanoid(),
+    args: [name],
+    workflowId: 'getAddressFromIP-' + nanoid(),
   });
-  console.log(`Started workflow ${handle.workflowId}`);
-
-  // optional: wait for client result
   console.log(await handle.result());
 }
 
