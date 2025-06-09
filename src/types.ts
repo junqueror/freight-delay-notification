@@ -16,6 +16,10 @@ interface Route {
 interface Email {
     subject: string,
     content: string,
+};
+
+interface EmailWithRecipient extends Email {
+    to: string; 
 }
 
 export type {
@@ -24,4 +28,5 @@ export type {
     Destination,
     Route,
     Email,
+    EmailWithRecipient,
 };

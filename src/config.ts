@@ -20,7 +20,7 @@ const RESEND = {
 // Buussiness logic 
 
 const ROUTING = {
-    DELAY_THRESHOLD: 1800, // 30 mins (seconds)
+    DELAY_THRESHOLD: 30, // minutes
 };
 
 const EMAIL = {

@@ -1,22 +1,48 @@
 // Add Activity Definitions here.
 
-// Get the IP address
-export async function getIP(): Promise<string> {
-  const url = 'https://icanhazip.com';
-  const response = await fetch(url);
-  const data = await response.text();
-  return data.trim();
-}
+import emailService from "./services/emailService";
+import routingService from "./services/routingService";
+import { Email, EmailWithRecipient, Route } from "./types";
+import { roundMinutes } from "./utils";
 
-// Use the IP address to get the location.
-export async function getLocationInfo(ip: string): Promise<string> {
-  const url = `http://ip-api.com/json/${ip}`;
-  const response = await fetch(url);
-  const data = await response.json() as {
-    city: string;
-    regionName: string;
-    country: string;
-  };
-  return `${data.city}, ${data.regionName}, ${data.country}`;
-}
+const getRouteDelay = async (route: Route): Promise<number> => {
+    const delaySecs = await routingService.getRouteDelay(route.origin, route.destination);
+
+    const delayMins = roundMinutes(delaySecs);
+
+    return delayMins
+};
+
+const checkDelay = async (delay: number): Promise<boolean> => {
+  const hasDelay = routingService.checkRouteHasDelay(delay);
+
+  return hasDelay;
+};
+
+const createDelayedRouteEmail = async (route: Route, delay: number): Promise<Email> => {
+  const email = await emailService.createDelayedRouteEmail(
+    route,
+    delay,
+  );
+
+  return email;
+};
+
+const sendDelayedRouteEmail = async (email: EmailWithRecipient): Promise<string> => {
+  await emailService.sendEmail({
+      to: email.to,
+      subject: email.subject,
+      content: email.content,
+  });
+
+  return "Delayed Route email sent to "
+};
+
+export {
+  getRouteDelay,
+  checkDelay,
+  createDelayedRouteEmail,
+  sendDelayedRouteEmail,
+};
+
 
