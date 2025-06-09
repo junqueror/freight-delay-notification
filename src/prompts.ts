@@ -11,16 +11,17 @@ const prompts: Prompts = {
 
         Create a short notification email to inform the user and apologize for the inconvenience. 
         The email tone should be human, friendly, but also professional.
-        It should include the following data:
+        The content should include the following data:
         - Origin: {{origin}}
         - Destination: {{destination}}
         - Route delay: {{delay}} seconds
         Convert the delay to the following format: DD days, HH hours, MM minutes (think about what's best for the user, including only necessary ones and never incldue seconds)
+        The content of the email should be properly formated in HTML to be displayed in email client tools
 
-        Your email response must be only a JSON object in the following format:
+        Your email response must be a single JSON object in the following format:
         {
             "subject": "string",
-            "body": "string"
+            "content": "string"
         }
         `.replace("{{origin}}", origin)
         .replace("{{destination}}", destination)

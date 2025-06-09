@@ -15,7 +15,7 @@ interface Route {
 
 interface Email {
     subject: string,
-    body: string,
+    content: string,
 }
 
 export type {

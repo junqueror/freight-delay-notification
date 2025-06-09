@@ -4,7 +4,7 @@ import { Coordinates, Destination, Origin } from "../types";
 
 // Documentation: https://github.com/googleapis/google-cloud-node/tree/main/packages/google-maps-routing
 const routingClient = new RoutesClient({
-    apiKey: config.ROUTING.GOOGLE_ROUTING_API_KEY,
+    apiKey: config.GOOGLE_ROUTING.API_KEY,
 });
 
 class RoutingService {
