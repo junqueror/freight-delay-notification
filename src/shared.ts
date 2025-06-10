@@ -1,1 +1,1 @@
-export const TASK_QUEUE_NAME="ip-address-ts";
+export const TASK_QUEUE_NAME="freight-delay-notification";

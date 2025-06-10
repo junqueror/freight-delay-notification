@@ -40,7 +40,7 @@ const freightDelayNotification = async (
       delay = await getRouteDelay(route);
       log.info("[Workflow]: Route delay:", { delay, units: "minutes" });
 
-      // Check id delay if is over the delay notification threshold
+      // Check id delay is over the delay notification threshold
       const hasDelay = await checkDelay(delay);
       log.info("[Workflow]: Route has delay?", { hasDelay });
 
@@ -52,7 +52,9 @@ const freightDelayNotification = async (
 
     } catch (error) {
       log.error("Failed to calculate route delay", { error });
-      throw new workflow.ApplicationFailure("Failed to calculate route delay");
+
+      // Finish workflow with error if it was not possible to calculate the delay
+      throw new workflow.ApplicationFailure("Failed to calculate freight delay");
     }
 
     // EMAIL
@@ -67,40 +69,44 @@ const freightDelayNotification = async (
           delay,
       );
     } catch (error) {
-      log.warn("Failed to create delay email", { error });
-        // NOTE: Better handle this logic here than in the service itself, since it's related with how the application works, not with the email sending feature
+        log.warn("Failed to create delay email", { error });
+
+        // NOTE: Better handle this logic here than in the service itself, since it's related with how the application works, not with the email sending responsibility
         // Depending on the business logic, we might want to include error handling and fallback functionaliity in the activity
-        // I'd also need to know more about Temporalio
-        // In that scenario, we would handle this error logic in the activity itself
+        // I'd also need to know more about Temporalio, but without knowing mroe I thin kthe best option is to keep everything separated in small steps (activities)
         try {
-          email = await createDefaultDelayedRouteEmail(route, delay);
+            // In case there is an error creating the email with Open AI, create a default one from template
+            email = await createDefaultDelayedRouteEmail(route, delay);
         } catch (error) {
-          log.error("Failed to create delay email", { error });
-          throw new workflow.ApplicationFailure("Failed to create delay email");
+            log.error("Failed to create delay email", { error });
+
+            // Finish workflow with error if it was not possible to create the email
+            throw new workflow.ApplicationFailure("Failed to create freight delay email");
         }
     }
     log.info("[Workflow]: Email created:", { email });
 
     // Add recipient to the email structure
     const emailWithRecipient: EmailWithRecipient = {
-      ...email,
-      to: formatRecipient(name, emailAddress), // Recipient format "Name <email>"
+        ...email,
+        to: formatRecipient(name, emailAddress), // Recipient format "Name <email>"
     };
 
     try {
+        // Send the delayed route email notification to the recepient email
+        const response = await sendDelayedRouteEmail(emailWithRecipient);
+        log.info("[Workflow]: Email sent:", { response });
 
-    // Send the delayed route email notification to the recepient email
-    const response = await sendDelayedRouteEmail(emailWithRecipient);
-    log.info("[Workflow]: Email sent:", { response });
-
-    return response;
+        return response;
 
     } catch (error) {
-      log.error("Failed to send freight delay notification email", { error });
-      throw new workflow.ApplicationFailure("Failed to send freight delay notification email");
+        log.error("Failed to send freight delay notification email", { error });
 
-      // TODO: We could add here a fallback flow to send a phone SMS instead, 
-      // using a new activity and a PhoneService with OpenAI model to create SMS and Twilio for sending (similar to email one)
+        // Finish workflow with error if it was not possible to send the email
+        throw new workflow.ApplicationFailure("Failed to send freight delay notification email");
+
+        // TODO: We could add here a fallback flow to send a phone SMS instead, 
+        // using a new activity and a PhoneService with OpenAI model to create SMS and Twilio for sending (similar to email one)
     }
 };
 

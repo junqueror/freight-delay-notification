@@ -1,12 +1,8 @@
 # Starter project
 
-This is an empty project that is scaffolded out when you run `npx @temporalio/create@latest ./myfolder` and choose the `empty` option.
+This is a project to complete an exercise for the hiring process in Levity AI. 
 
-- Add your Activity Definitions to `src/activities.ts`.
-- Add your Workflow Definitions to `src/workflows.ts`.
-- Set your task queue name in `src/shared.ts`.
-- Modify the `src/client.ts` file and replace `YOUR_WORKFLOW` with the name of your Workflow.
-- Add Activity and Workflow tests to the `src/mocha` directory in files with the extension `.test.ts`.
+It consists on a workflow created with Temporal to monitor traffic delays on a freight delivery route and notify a customer if a significant delay occurs. 
 
 ## Running the code
 
@@ -21,3 +17,6 @@ The `package.json` file contains scripts for running the client, the Worker, and
 1. Run `npm run format` to format your code according to the rules in `.prettierrc`.
 1. Run `npm run lint` to lint your code according to the rules in `eslintrc.js`.
 1. Run `npm test` to run the tests.
+
+## Result
+
