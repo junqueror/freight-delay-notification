@@ -18,7 +18,7 @@ The `package.json` file contains scripts for running the client, the Worker, and
 1. Run `npm run lint` to lint your code according to the rules in `eslintrc.js`.
 1. Run `npm test` to run the tests.
 
-## Result
+## Result
 
 Example:
 
