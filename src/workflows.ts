@@ -67,12 +67,17 @@ const freightDelayNotification = async (
           delay,
       );
     } catch (error) {
-        console.error(error);
+      log.warn("Failed to create delay email", { error });
         // NOTE: Better handle this logic here than in the service itself, since it's related with how the application works, not with the email sending feature
         // Depending on the business logic, we might want to include error handling and fallback functionaliity in the activity
         // I'd also need to know more about Temporalio
         // In that scenario, we would handle this error logic in the activity itself
-        email = await createDefaultDelayedRouteEmail(route, delay);
+        try {
+          email = await createDefaultDelayedRouteEmail(route, delay);
+        } catch (error) {
+          log.error("Failed to create delay email", { error });
+          throw new workflow.ApplicationFailure("Failed to create delay email");
+        }
     }
     log.info("[Workflow]: Email created:", { email });
 

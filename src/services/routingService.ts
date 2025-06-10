@@ -1,6 +1,7 @@
 import { RoutesClient } from "@googlemaps/routing";
 import config from "../config";
 import { Coordinates, Destination, Origin } from "../types";
+import { RoutingServiceError } from "../errors";
 
 // Documentation: https://github.com/googleapis/google-cloud-node/tree/main/packages/google-maps-routing
 const routingClient = new RoutesClient({
@@ -27,8 +28,12 @@ class RoutingService {
         console.info("[RoutingService] Route standard duration:", standardDuration, "seconds");
         console.info("[RoutingService] Route with traffic duration:", trafficDuration, "seconds");
 
-        if (!standardDuration || !trafficDuration) {
-            throw new Error("No route duration found");
+        if (!standardDuration) {
+            throw new RoutingServiceError("Error retrieving routing data from Google Routing API: No standard route duration retrieved");
+        }
+
+        if (!trafficDuration) {
+            throw new RoutingServiceError("Error retrieving routing data from Google Routing API: No traffic route duration retrieved");
         }
 
         const delay = trafficDuration - standardDuration;
@@ -83,13 +88,13 @@ class RoutingService {
         const response = await this.routingClient.computeRoutes(request, options);
 
         if (!response?.length) {
-            throw new Error("No routes found");
+            throw new RoutingServiceError("Error retrieving routing data from Google Routing API: No responses retrieved");
         }
 
         const routes = response[0].routes;
 
         if (!routes) {
-            throw new Error("No routes found");
+            throw new RoutingServiceError("Error retrieving routing data from Google Routing API: No routes retrieved");
         }
 
         const mainRoute = routes[0];

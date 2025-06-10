@@ -4,6 +4,7 @@ import { Email, Route } from '../types';
 import prompts from '../prompts';
 import { Resend } from 'resend';
 import emailTemplates from '../emailTemplates';
+import { EmailServiceError } from '../errors';
 
 // Documentation: https://github.com/openai/openai-node
 const openAIClient = new OpenAI({
@@ -46,11 +47,15 @@ class EmailService {
 
         const emailResponse = await this._createEmail(prompt);
 
-        const email: Email = JSON.parse(emailResponse) as Email;
+        try {
+            const email: Email = JSON.parse(emailResponse) as Email;
 
-        console.info("[EmailService] Delay email created:", email);
+            console.info("[EmailService] Delay email created:", email);
 
-        return email;
+            return email;
+        } catch (error) {
+            throw new EmailServiceError(`Error parsing email created from OpenAI API; ${error}`);
+        }
     };
 
     // Create an email to inform a user about a route delay from the default email template
@@ -74,7 +79,7 @@ class EmailService {
         const content = response.choices[0].message.content;
 
         if (!content) {
-            throw new Error("Error creating email");
+            throw new EmailServiceError("Error creating email: OpenAI API response content is empty");
         }
 
         return content;
@@ -100,7 +105,7 @@ class EmailService {
         
         if (error) {
             console.error({ error });
-            throw new Error(`Error sending email ${error.message}`);
+            throw new EmailServiceError(`Error sending email with Resend API: ${error.message}`);
         }
 
         console.info("[EmailService] Email send with id:", data?.id);
