@@ -3,6 +3,7 @@ import config from '../config';
 import { Email, Route } from '../types';
 import prompts from '../prompts';
 import { Resend } from 'resend';
+import emailTemplates from '../emailTemplates';
 
 // Documentation: https://github.com/openai/openai-node
 const openAIClient = new OpenAI({
@@ -18,9 +19,9 @@ const resendClient = new Resend(config.RESEND.API_KEY);
 
 class EmailService {
 
-    static OPENAI_CREATE_EMAIL_MODEL: string = config.OPENAI.CREATE_EMAIL_MODEL;
+    static OPENAI_CREATE_EMAIL_MODEL: string = config.OPENAI.CREATE_EMAIL_MODEL; // Open AI LLM model used to craft emails
 
-    private readonly fromEmail: string = config.EMAIL.DEFAULT_FROM_EMAIL;
+    private readonly fromEmail: string = config.EMAIL.DEFAULT_FROM_EMAIL; // Default sender email for the application
 
     constructor(
         private readonly openai: OpenAI,
@@ -33,7 +34,7 @@ class EmailService {
     async createDelayedRouteEmail(route: Route, delay: number): Promise<Email> {
         console.info("[EmailService] Creating delay email ...");
 
-        // TODO: Improve it to include directions instead of coordinates (RoutingService)
+        // TODO: Improve it to include addresses instead of coordinates (RoutingService)
         const textOrigin: string = `${route.origin.latitude}, ${route.origin.longitude}`;
         const textDestination: string = `${route.destination.latitude}, ${route.destination.longitude}`;
 
@@ -50,7 +51,16 @@ class EmailService {
         console.info("[EmailService] Delay email created:", email);
 
         return email;
-    }
+    };
+
+    // Create an email to inform a user about a route delay from the default email template
+    createDefaultDelayedRouteEmail(route: Route, delay: number): Email {
+        const email: Email = emailTemplates.defaultDelayedRouteEmail(route, delay);
+
+        console.info("[EmailService] Delay email created from template:", email);
+
+        return email;
+    };
 
     async _createEmail(prompt: string): Promise<string> {
         console.info("[EmailService] Creating email ...");
@@ -90,11 +100,8 @@ class EmailService {
         
         if (error) {
             console.error({ error });
-            throw new Error("Error sending email");
+            throw new Error(`Error sending email ${error.message}`);
         }
-
-        console.log("Type of resend data", typeof data);
-        console.log("resend data", data);
 
         console.info("[EmailService] Email send with id:", data?.id);
     }

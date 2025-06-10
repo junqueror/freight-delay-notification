@@ -9,10 +9,10 @@ const routingClient = new RoutesClient({
 
 class RoutingService {
 
-    private readonly delayThreshold: number;
+    private readonly delayThreshold: number; // Min number of minutes on a delay to send an email notification
 
     constructor(private readonly routingClient: RoutesClient) {
-        this.delayThreshold = config.ROUTING.DELAY_THRESHOLD;
+        this.delayThreshold = config.ROUTING.MIN_DELAY_TO_NOTIFICATION;
     }
 
     // Calculate the delay of a route (seconds) for a given origin and destination
@@ -73,10 +73,10 @@ class RoutingService {
                 },
             },
         };
-        
+
         const options = {
             otherArgs: {
-                headers: {'X-Goog-Fieldmask': '*'}
+                headers: { 'X-Goog-Fieldmask': '*' }
             }
         } as any;
 

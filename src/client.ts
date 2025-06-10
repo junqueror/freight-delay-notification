@@ -1,26 +1,40 @@
 import { Connection, Client } from '@temporalio/client';
-import { getAddressFromIP } from './workflows';
+import { freightDelayNotification } from './workflows';
 import { nanoid } from 'nanoid';
 import { TASK_QUEUE_NAME } from './shared';
 import process from 'process';
 
+// Configure client request
+const name = 'John Doe';
+const email = 'john.doe@example.com';
+
+const route = {
+  origin: {
+      latitude: 41.628401846095095,
+      longitude: -4.757610392341808
+  },
+  destination: {
+      latitude: 36.2784207503035,
+      longitude: -6.087216903834627,
+  },
+};
+
 async function run() {
 
-  if (process.argv.length <= 2) {
-    console.error('Must specify a name as the command-line argument');
-    process.exit(1);
-  }
-
-  const name = process.argv[2];
+  // Setup Temporal connection and client
   const connection = await Connection.connect({ address: 'localhost:7233' });
   const client = new Client({ connection });
 
-  const handle = await client.workflow.start(getAddressFromIP, {
+  // Trigger the task
+  const handle = await client.workflow.start(freightDelayNotification, {
     taskQueue: TASK_QUEUE_NAME,
-    args: [name],
-    workflowId: 'getAddressFromIP-' + nanoid(),
+    args: [name, email, route],
+    workflowId: `freight-delay-notification-${nanoid()}`,
   });
-  console.log(await handle.result());
+
+  // Handle result
+  const result = await handle.result()
+  console.info("Client result: ", result);
 }
 
 run().catch((err) => {
