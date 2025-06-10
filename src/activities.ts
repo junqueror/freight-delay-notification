@@ -1,6 +1,5 @@
 // Add Activity Definitions here.
 
-import emailTemplates from "./emailTemplates";
 import emailService from "./services/emailService";
 import routingService from "./services/routingService";
 import { Email, EmailWithRecipient, Route } from "./types";
