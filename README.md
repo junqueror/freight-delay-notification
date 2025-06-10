@@ -20,3 +20,6 @@ The `package.json` file contains scripts for running the client, the Worker, and
 
 ## Result
 
+Example:
+
+![Freight-delay-notification-example](docs/media/freight-delay-notification-example.mov)
