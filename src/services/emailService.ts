@@ -5,6 +5,7 @@ import prompts from '../prompts';
 import { Resend } from 'resend';
 import emailTemplates from '../emailTemplates';
 import { EmailServiceError } from '../errors';
+import { routeToString } from '../utils';
 
 // Documentation: https://github.com/openai/openai-node
 // Instantiate client to perform requests to OpenAI API
@@ -39,10 +40,10 @@ class EmailService {
 
         // Prepare data about delayed route to include in the email
         // TODO: Improve it to include addresses instead of coordinates (RoutingService)
-        const textOrigin: string = `${route.origin.latitude}, ${route.origin.longitude}`;
-        const textDestination: string = `${route.destination.latitude}, ${route.destination.longitude}`;
+        const { textOrigin, textDestination } = routeToString(route);
 
         // Prepare the prompt to be used to craft the email with OpenAI LLM
+        // TODO: Incldue the name of the user
         const prompt = prompts.createDelayedRouteEmail({
             origin: textOrigin, 
             destination: textDestination, 
@@ -66,8 +67,11 @@ class EmailService {
 
     // Create an email to inform a user about a route delay from the default email template
     createDefaultDelayedRouteEmail(route: Route, delay: number): Email {
+        // Prepare data about delayed route to include in the email
+        const { textOrigin, textDestination } = routeToString(route);
+
         // Use default email template with custom data to crete delayed email
-        const email: Email = emailTemplates.defaultDelayedRouteEmail(route, delay);
+        const email: Email = emailTemplates.defaultDelayedRouteEmail(textOrigin, textDestination, delay);
 
         console.info("[EmailService] Delay email created from template:", email);
 

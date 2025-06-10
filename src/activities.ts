@@ -20,19 +20,7 @@ const checkDelay = async (delay: number): Promise<boolean> => {
 };
 
 const createDelayedRouteEmail = async (route: Route, delay: number): Promise<Email> => {
-  let email: Email;
-
-  // NOTE: Better handle this logic here than in the service itself, since it's related with how the application works, so with the email sending feature
-  try {
-    email = await emailService.createDelayedRouteEmail(route, delay);
-  } catch (error) {
-    console.error(error);
-
-    // NOTE: Depending on the business logic, we might want to separate default email creation as a separate activity. It might be interestign to track Open AI dependant failures.
-    // I'd also need to know more about Temporalio
-    // In that scenario, we would handle this error logic in the workdlow itself
-    email = emailService.createDefaultDelayedRouteEmail(route, delay);
-  }
+  const email = await emailService.createDelayedRouteEmail(route, delay);
 
   return email;
 };
