@@ -22,4 +22,9 @@ The `package.json` file contains scripts for running the client, the Worker, and
 
 Example:
 
-![Freight-delay-notification-example](docs/media/freight-delay-notification-example.mov)
+<video width="100%" controls>
+  <source src="docs/media/freight-delay-notification-example.mov" type="video/quicktime">
+  Your browser does not support the video tag.
+</video>
+
+You can download it from here: [freight-delay-notification-example](docs/media/freight-delay-notification-example.mov)
