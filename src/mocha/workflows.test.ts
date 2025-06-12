@@ -40,21 +40,21 @@ describe('Freight Delay Notification', () => {
         taskQueue,
         workflowsPath: require.resolve('../workflows'),
         activities: {
-          getRouteDelay: async (_route: Route): Promise<number> => 45,
+          getDelay: async (_route: Route): Promise<number> => 2722,
           checkDelay: async (_delay: number): Promise<boolean> => true,
-          createDelayedRouteEmail: async (_route: Route, _delay: number): Promise<Email> => ({
+          createEmail: async (_route: Route, _delay: number): Promise<Email> => ({
             subject: 'subject',
             content: '<html><p>content</p></html>',
           }),
-          createDefaultDelayedRouteEmail: async (_route: Route, _delay: number): Promise<Email> => ({
+          createDefaultEmail: async (_route: Route, _delay: number): Promise<Email> => ({
             subject: 'subject',
             content: '<html><p>content</p></html>',
           }),
-          sendDelayedRouteEmail: async (_email: Email): Promise<string> => 'Freight delay notification email sent to \'email@email.com\'',
+          sendEmail: async (_email: Email): Promise<void> => {},
         },
       });
 
-      const expectedResult = 'Freight delay notification email sent to \'email@email.com\'';
+      const expectedResult = 'Freight delay notification email sent to \'Name <email@email.com>\'';
   
       // Execution: Run workflow
       const result = await worker.runUntil(
@@ -93,17 +93,17 @@ describe('Freight Delay Notification', () => {
         taskQueue,
         workflowsPath: require.resolve('../workflows'),
         activities: {
-          getRouteDelay: async (_route: Route): Promise<number> => 0,
+          getDelay: async (_route: Route): Promise<number> => 0,
           checkDelay: async (_delay: number): Promise<boolean> => false,
-          createDelayedRouteEmail: async (_route: Route, _delay: number): Promise<Email> => ({
+          createEmail: async (_route: Route, _delay: number): Promise<Email> => ({
             subject: 'subject',
             content: '<html><p>content</p></html>',
           }),
-          createDefaultDelayedRouteEmail: async (_route: Route, _delay: number): Promise<Email> => ({
+          createDefaultEmail: async (_route: Route, _delay: number): Promise<Email> => ({
             subject: 'subject',
             content: '<html><p>content</p></html>',
           }),
-          sendDelayedRouteEmail: async (_email: Email): Promise<string> => 'Freight delay notification email sent to \'email@email.com\'',
+          sendEmail: async (_email: Email): Promise<void> => {},
         },
       });
 

@@ -3,56 +3,29 @@
 import emailService from "./services/emailService";
 import routingService from "./services/routingService";
 import { Email, EmailWithRecipient, Route } from "./types";
-import { roundMinutes } from "./utils";
 
-const getRouteDelay = async (route: Route): Promise<number> => {
-    const delaySecs = await routingService.getRouteDelay(route.origin, route.destination);
+// Declare activities
 
-    const delayMins = roundMinutes(delaySecs);
+// in order to call service methods, we need to create new functions that do not depend on service instance and convert everythong to async (required by activities)
 
-    return delayMins
-};
+const getDelay = async (route: Route): Promise<number> => routingService.getRouteDelay(route.origin, route.destination);
 
-const checkDelay = async (delay: number): Promise<boolean> => {
-  const hasDelay = routingService.checkRouteHasDelay(delay);
+const checkDelay = async (delay: number): Promise<boolean> => routingService.checkRouteHasDelay(delay);
 
-  return hasDelay;
-};
+const createEmail = async (route: Route, delay: number): Promise<Email> => emailService.createDelayedRouteEmail(route, delay);
 
-const createDelayedRouteEmail = async (route: Route, delay: number): Promise<Email> => {
-  const email = await emailService.createDelayedRouteEmail(route, delay);
+const createDefaultEmail = async (route: Route, delay: number): Promise<Email> => emailService.createDefaultDelayedRouteEmail(route, delay);
 
-  return email;
-};
+const sendEmail = async (email: EmailWithRecipient): Promise<void> => emailService.sendEmail(email);
 
-const createDefaultDelayedRouteEmail = async (route: Route, delay: number): Promise<Email> => {
-  const email = emailService.createDefaultDelayedRouteEmail(route, delay);
-
-  return email; 
-};
-
-const sendDelayedRouteEmail = async (email: EmailWithRecipient): Promise<string> => {
-  await emailService.sendEmail({
-      to: email.to,
-      subject: email.subject,
-      content: email.content,
-  });
-
-  return `
-Freight delay notification email sent to '${email.to}'
-  
-[${email.subject}]
-
-${email.content}
-  `;
-};
+// Export activities
 
 export {
-  getRouteDelay,
+  getDelay,
   checkDelay,
-  createDelayedRouteEmail,
-  sendDelayedRouteEmail,
-  createDefaultDelayedRouteEmail,
+  createEmail,
+  createDefaultEmail,
+  sendEmail,
 };
 
 

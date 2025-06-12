@@ -31,19 +31,18 @@ describe('getRouteDelay activity', async () => {
       },
     };
     const expectedDelaySeconds = 1320; // 22 minutes in seconds
-    const expectedDelayMinutes = 22; // minutes
 
     // Mock the routing service to return delay in seconds
     getRouteDelayStub.resolves(expectedDelaySeconds);
 
     // Execution: Run getRouteDelay activity
     const env = new MockActivityEnvironment();
-    const delay = await env.run(activities.getRouteDelay, route);
+    const delay = await env.run(activities.getDelay, route);
 
     // Assertions: Check mock called and retrieved delay in minutes
     assert(getRouteDelayStub.calledOnce);
     assert(getRouteDelayStub.calledWithExactly(route.origin, route.destination));
-    assert.strictEqual(delay, expectedDelayMinutes);
+    assert.strictEqual(delay, expectedDelaySeconds);
   });
 });
 

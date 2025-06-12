@@ -4,14 +4,15 @@ import * as workflow from '@temporalio/workflow';
 import { log } from '@temporalio/workflow';
 import type * as activities from './activities';
 import { Route, EmailWithRecipient, Email } from './types';
-import { formatRecipient } from './utils';
+import { formatRecipient, roundMinutes } from './utils';
 
 // Load Activities and assign the Retry Policy
-const { getRouteDelay, 
+const { 
+  getDelay, 
   checkDelay, 
-  createDelayedRouteEmail,
-   sendDelayedRouteEmail, 
-  createDefaultDelayedRouteEmail,
+  createEmail,
+  createDefaultEmail, 
+  sendEmail,
  } = workflow.proxyActivities<typeof activities>({
   retry: {
     initialInterval: '10 seconds', // amount of time that must elapse before the first retry occurs.
@@ -30,14 +31,14 @@ const freightDelayNotification = async (
 ): Promise<string> => {
     // ROUTING
 
-    let delay: number;
+    let delay: number; // minutes
 
     try {
       // TODO: Modify workflow to handle route addresses instad of coordinates to improve UX
       // This can be done with RoutingService.getCoordinatesFromAddress() or similar method and a new activity
 
       // Get delay (minutes) for the specified routes
-      delay = await getRouteDelay(route);
+      delay = roundMinutes(await getDelay(route));
       log.info("[Workflow]: Route delay:", { delay, units: "minutes" });
 
       // Check id delay is over the delay notification threshold
@@ -64,7 +65,7 @@ const freightDelayNotification = async (
     let email: Email;
 
     try {
-        email = await createDelayedRouteEmail(
+        email = await createEmail(
           route,
           delay,
       );
@@ -76,7 +77,7 @@ const freightDelayNotification = async (
         // I'd also need to know more about Temporalio, but without knowing mroe I thin kthe best option is to keep everything separated in small steps (activities)
         try {
             // In case there is an error creating the email with Open AI, create a default one from template
-            email = await createDefaultDelayedRouteEmail(route, delay);
+            email = await createDefaultEmail(route, delay);
         } catch (error) {
             log.error("Failed to create delay email", { error });
 
@@ -94,11 +95,16 @@ const freightDelayNotification = async (
 
     try {
         // Send the delayed route email notification to the recepient email
-        const response = await sendDelayedRouteEmail(emailWithRecipient);
-        log.info("[Workflow]: Email sent:", { response });
+        await sendEmail(emailWithRecipient);
+        log.info(`[Workflow]:
+            Freight delay notification email sent to '${emailWithRecipient.to}'
+              
+            [${email.subject}]
 
-        return response;
+            ${email.content}
+        `);
 
+        return `Freight delay notification email sent to '${emailWithRecipient.to}'`;
     } catch (error) {
         log.error("Failed to send freight delay notification email", { error });
 
